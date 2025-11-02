@@ -9,9 +9,13 @@ export class AuthService {
         this.refreshTokens = new Map<string, string>();
     }
 
-    login(email: string){
+    login(email: string, password: string){
         if (!email) {
             throw new UnauthorizedException('Email is required');
+        }
+
+        if (!password) {
+            throw new UnauthorizedException('Password is required');
         }
 
         const payload = { email };
