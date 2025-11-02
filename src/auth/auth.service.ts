@@ -1,0 +1,49 @@
+import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
+
+@Injectable()
+export class AuthService {
+    private refreshTokens: Map<string, string>; 
+
+    constructor(private jwtService: JwtService) {
+        this.refreshTokens = new Map<string, string>();
+    }
+
+    login(email: string){
+        if (!email) {
+            throw new UnauthorizedException('Email is required');
+        }
+
+        const payload = { email };
+        const accessToken = this.jwtService.sign(payload);
+        const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
+
+        this.refreshTokens.set(refreshToken, email);
+        return { accessToken, refreshToken };
+    }
+
+    refreshToken(refreshToken: string){
+        try {
+            const payload = this.jwtService.verify(refreshToken);
+            const storedEmail = this.refreshTokens.get(refreshToken);
+
+            if (storedEmail !== payload.email) {
+                throw new UnauthorizedException('Invalid refresh token');
+            }
+
+            const newAccessToken = this.jwtService.sign({ email: payload.email });
+            return { accessToken: newAccessToken };
+        } catch {
+            throw new UnauthorizedException('Invalid refresh token');
+        }
+    }
+
+    getProfile(accessToken: string){
+        try {
+            const payload = this.jwtService.verify(accessToken);
+            return { email: payload.email, name: 'Mock User' };
+        } catch {
+            throw new UnauthorizedException('Invalid or expired access token');
+        }
+    }
+}
