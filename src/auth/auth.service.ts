@@ -50,4 +50,17 @@ export class AuthService {
             throw new UnauthorizedException('Invalid or expired access token');
         }
     }
+
+    logout(refreshToken: string){
+        if (!refreshToken) {
+            throw new UnauthorizedException('Refresh token is required');
+        }
+
+        if (!this.refreshTokens.has(refreshToken)) {
+            throw new UnauthorizedException('Invalid refresh token');
+        }
+
+        this.refreshTokens.delete(refreshToken);
+        return { success: true, message: 'Logged out' };
+    }
 }

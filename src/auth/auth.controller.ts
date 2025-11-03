@@ -15,6 +15,11 @@ export class AuthController {
         return this.authService.refreshToken(refreshToken);
     }
 
+    @Post('logout')
+    logout(@Body('refreshToken') refreshToken: string) {
+        return this.authService.logout(refreshToken);
+    }
+
     @Get('profile')
     getProfile(@Headers('Authorization') authHeader: string) {
         const token = authHeader?.split(' ')[1];
