@@ -19,8 +19,9 @@ export class AuthService {
         }
 
         const payload = { email };
-        const accessToken = this.jwtService.sign(payload);
-        const refreshToken = this.jwtService.sign(payload, { expiresIn: '7d' });
+    // Short-lived tokens for testing: access 1 minute, refresh 3 minutes
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '1m' });
+    const refreshToken = this.jwtService.sign(payload, { expiresIn: '3m' });
 
         this.refreshTokens.set(refreshToken, email);
         return { accessToken, refreshToken };
@@ -35,7 +36,8 @@ export class AuthService {
                 throw new UnauthorizedException('Invalid refresh token');
             }
 
-            const newAccessToken = this.jwtService.sign({ email: payload.email });
+            // New access token should also be short-lived
+            const newAccessToken = this.jwtService.sign({ email: payload.email }, { expiresIn: '1m' });
             return { accessToken: newAccessToken };
         } catch {
             throw new UnauthorizedException('Invalid refresh token');
